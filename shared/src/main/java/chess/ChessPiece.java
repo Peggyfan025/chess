@@ -260,28 +260,61 @@ class PawnMove extends PieceMoveCalculator{
         Collection<ChessMove> moves = new ArrayList<>();
         int row = position.getRow();
         int col = position.getColumn();
-        int[][] directions = {
-                {2, 1}, {2, -1}, {-2, 1}, {2, -1},
-                {1, 2}, {1, -2}, {-1, 2}, {-1, -2}
-        };
-        for (int[] direction : directions) {
-            int r = row + direction[0];
-            int c = col + direction[1];
+        int direction;
+        int startRow;
+        int promotionRow;
 
-            if (isInsideBoard(r, c)) {
-                ChessPosition end = new ChessPosition(r, c);
-                if (squares.getPiece(end) == null){
-                    moves.add(new ChessMove(position, end, null));
-                }
-                else if (squares.getPiece(end).getTeamColor() != piece.getTeamColor()) {
-                    moves.add(new ChessMove(position, end, null));
-                    break;
-                }
-                else {
-                    break;
+        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+            direction = 1;
+            startRow = 2;
+            promotionRow = 8;
+        } else {
+            direction = -1;
+            startRow = 7;
+            promotionRow = 1;
+        }
+        // One-square forward move
+        ChessPosition oneForward = new ChessPosition(row + direction, col);
+
+        if (isInsideBoard(oneForward.getRow(), oneForward.getColumn()) && squares.getPiece(oneForward) == null) {
+            addPawnMove(moves, oneForward, promotionRow);
+
+            // Two-square forward move from starting row
+            ChessPosition twoForward = new ChessPosition(row + 2 * direction, col);
+
+            if (row == startRow && isInsideBoard(twoForward.getRow(), twoForward.getColumn()) && squares.getPiece(twoForward) == null) {
+                moves.add(new ChessMove(position, twoForward, null));
+            }
+        }
+
+        // Diagonal captures
+        int[] captureCols = {col - 1, col + 1};
+
+        for (int captureCol : captureCols) {
+            int captureRow = row + direction;
+
+            if (isInsideBoard(captureRow, captureCol)) {
+                ChessPosition capturePosition = new ChessPosition(captureRow, captureCol);
+                ChessPiece capturedPiece = squares.getPiece(capturePosition);
+
+                if (capturedPiece != null && capturedPiece.getTeamColor() != piece.getTeamColor()) {
+                    addPawnMove(moves, capturePosition, promotionRow);
                 }
             }
         }
+
         return moves;
     }
+
+    private void addPawnMove(Collection<ChessMove> moves, ChessPosition end, int promotionRow) {
+        if (end.getRow() == promotionRow) {
+            moves.add(new ChessMove(position, end, ChessPiece.PieceType.QUEEN));
+            moves.add(new ChessMove(position, end, ChessPiece.PieceType.BISHOP));
+            moves.add(new ChessMove(position, end, ChessPiece.PieceType.ROOK));
+            moves.add(new ChessMove(position, end, ChessPiece.PieceType.KNIGHT));
+        } else {
+            moves.add(new ChessMove(position, end, null));
+        }
+    }
+
 }
