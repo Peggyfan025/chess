@@ -132,7 +132,16 @@ abstract class PieceMoveCalculator{
 
             while (isInsideBoard(row, col)) {
                 ChessPosition end = new ChessPosition(row, col);
-                moves.add(new ChessMove(position, end, null));
+                if (squares.getPiece(end) == null){
+                    moves.add(new ChessMove(position, end, null));
+                }
+                else if (squares.getPiece(end).getTeamColor() != piece.getTeamColor()) {
+                    moves.add(new ChessMove(position, end, null));
+                    break;
+                }
+                else {
+                    break;
+                }
 
                 row += direction[0];
                 col += direction[1];
@@ -199,7 +208,13 @@ class KingMove extends PieceMoveCalculator{
 
             if (isInsideBoard(r, c)) {
                 ChessPosition end = new ChessPosition(r, c);
-                moves.add(new ChessMove(position, end, null));
+                if (squares.getPiece(end) == null){
+                    moves.add(new ChessMove(position, end, null));
+                }
+                else if (squares.getPiece(end).getTeamColor() != piece.getTeamColor()) {
+                    moves.add(new ChessMove(position, end, null));
+                }
+
             }
         }
         return moves;
@@ -224,7 +239,13 @@ class KnightMove extends PieceMoveCalculator{
 
             if (isInsideBoard(r, c)) {
                 ChessPosition end = new ChessPosition(r, c);
-                moves.add(new ChessMove(position, end, null));
+                if (squares.getPiece(end) == null){
+                    moves.add(new ChessMove(position, end, null));
+                }
+                else if (squares.getPiece(end).getTeamColor() != piece.getTeamColor()) {
+                    moves.add(new ChessMove(position, end, null));
+                }
+
             }
         }
         return moves;
@@ -249,7 +270,16 @@ class PawnMove extends PieceMoveCalculator{
 
             if (isInsideBoard(r, c)) {
                 ChessPosition end = new ChessPosition(r, c);
-                moves.add(new ChessMove(position, end, null));
+                if (squares.getPiece(end) == null){
+                    moves.add(new ChessMove(position, end, null));
+                }
+                else if (squares.getPiece(end).getTeamColor() != piece.getTeamColor()) {
+                    moves.add(new ChessMove(position, end, null));
+                    break;
+                }
+                else {
+                    break;
+                }
             }
         }
         return moves;
