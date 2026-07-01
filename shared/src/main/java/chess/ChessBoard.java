@@ -54,39 +54,39 @@ public class ChessBoard {
      */
     public void resetBoard() {
         squares = new ChessPiece[8][8];
-        for (int i=0; i<=7; i++){
+        for (int i=1; i<=8; i++){
             ChessPiece w_pawn = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
-            squares[1][i] = w_pawn;
+            addPiece(new ChessPosition(2,i),w_pawn);
             ChessPiece b_pawn = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
-            squares[6][i] = b_pawn;
+            addPiece(new ChessPosition(7,i),b_pawn);
         }
-        for (int i=0; i<=2;i++){
+        for (int i=0; i<=1;i++){
             ChessPiece w_rook = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
-            squares[0][0] = w_rook;
-            squares[0][7] = w_rook;
+            addPiece(new ChessPosition(1,1),w_rook);
+            addPiece(new ChessPosition(1,8),w_rook);
             ChessPiece b_rook = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
-            squares[7][0] = b_rook;
-            squares[7][7] = b_rook;
-            ChessPiece w_knight = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
-            squares[0][1] = w_knight;
-            squares[0][6] = w_knight;
-            ChessPiece b_knight = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT);
-            squares[7][1] = b_knight;
-            squares[7][6] = b_knight;
+            addPiece(new ChessPosition(8,1),b_rook);
+            addPiece(new ChessPosition(8,8),b_rook);
             ChessPiece w_bishop = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP);
-            squares[0][2] = w_bishop;
-            squares[0][5] = w_bishop;
+            addPiece(new ChessPosition(1,3),w_bishop);
+            addPiece(new ChessPosition(1,6),w_bishop);
             ChessPiece b_bishop = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP);
-            squares[7][2] = b_bishop;
-            squares[7][5] = b_bishop;
+            addPiece(new ChessPosition(8,3),b_bishop);
+            addPiece(new ChessPosition(8,6),b_bishop);
+            ChessPiece w_knight = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
+            addPiece(new ChessPosition(1,2),w_knight);
+            addPiece(new ChessPosition(1,7),w_knight);
+            ChessPiece b_knight = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT);
+            addPiece(new ChessPosition(8,2),b_knight);
+            addPiece(new ChessPosition(8,7),b_knight);
         }
         ChessPiece w_queen = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN);
-        squares[0][3] = w_queen;
+        addPiece(new ChessPosition(1, 4),w_queen);
         ChessPiece b_queen = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN);
-        squares[7][3] = b_queen;
+        addPiece(new ChessPosition(8, 4),b_queen);
         ChessPiece w_king = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING);
-        squares[0][4] = w_king;
+        addPiece(new ChessPosition(1, 5),w_king);
         ChessPiece b_king = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING);
-        squares[7][4] = b_king;
+        addPiece(new ChessPosition(8, 5),b_king);
     }
 }
