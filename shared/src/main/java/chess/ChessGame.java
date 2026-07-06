@@ -66,13 +66,33 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = board.getPiece(startPosition);
-        Collection <ChessMove> moves = piece.pieceMoves(board, startPosition);
-        //remove invalid moves
-        //write check mate first
-        for (ChessMove move:moves){
-
+        if (piece == null){
+            return null;
         }
+        Collection <ChessMove> moves = piece.pieceMoves(board, startPosition);
+        Collection <ChessMove> validMoves = new ArrayList<>();
 
+        for (ChessMove move:moves){
+            ChessPosition end = move.getEndPosition();
+            ChessPiece end_piece = board.getPiece(end);
+            ChessPiece.PieceType promotionType = move.getPromotionPiece();
+            if (promotionType != null){
+                ChessPiece promotionPiece = new ChessPiece(piece.getTeamColor(),promotionType);
+                board.addPiece(end,promotionPiece);
+            }
+            else {
+                board.addPiece(end, piece);
+            }
+
+            board.addPiece(startPosition, null);
+            //save original board and temporarily apply the move to
+            if (!isInCheck(piece.getTeamColor())){
+                validMoves.add(move);
+            }
+            board.addPiece(end, end_piece);
+            board.addPiece(startPosition, piece);
+        }
+        return validMoves;
     }
 
     /**
@@ -89,7 +109,10 @@ public class ChessGame {
 
         board.addPiece(end, piece);
         board.addPiece(start, null);
-        // check if piece at start position, if piece is in the turn, if move is in valid moves, account for promotion
+        // check if piece at start position,
+        // if piece is in the turn,
+        // if move is in valid moves,
+        // account for promotion
         if (teamTurn == TeamColor.BLACK){
             teamTurn = TeamColor.WHITE;
         }
