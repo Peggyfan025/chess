@@ -183,7 +183,9 @@ public class ChessGame {
         if (!isInCheck(teamColor)){
             return false;
         }
-        //if team has any valid move
+        if (anyValidMoves(teamColor) == true){
+            return false;
+        }
         return true;
     }
 
@@ -195,17 +197,30 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if (isInCheck(teamColor)){
+            return false;
+        }
+        if (anyValidMoves(teamColor) == true){
+            return false;
+        }
+        return true;
     }
 
     //private helper method
-    private boolean anyValidMoves(){
+    private boolean anyValidMoves(TeamColor color){
         for (int i=1; i<=8;i++){
             for (int j=1; j<=8;j++){
                 ChessPosition square = new ChessPosition(i,j);
                 ChessPiece piece = board.getPiece(square);
+                if (piece != null && piece.getTeamColor() == color){
+                    Collection<ChessMove> validMoves = validMoves(square);
+                    if (!validMoves.isEmpty()){
+                        return true;
+                    }
+                }
             }
         }
+        return false;
     }
 
     /**
