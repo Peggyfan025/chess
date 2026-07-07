@@ -105,15 +105,30 @@ public class ChessGame {
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();
-        ChessPiece.PieceType promotion = move.getPromotionPiece();
         ChessPiece piece = board.getPiece(start);
+        ChessPiece end_piece = null;
+        if (piece == null){
+            throw new InvalidMoveException("No piece at start");
+        }
+        else if (piece.getTeamColor() != teamTurn){
+            throw new InvalidMoveException("Not in turn");
+        }
 
-        board.addPiece(end, piece);
-        board.addPiece(start, null);
-        // check if piece at start position,
-        // if piece is in the turn,
-        // if move is in valid moves,
-        // account for promotion
+        ChessPiece.PieceType promotion_type = move.getPromotionPiece();
+        Collection<ChessMove> validMoves = validMoves(start);
+        if (!validMoves.contains(move)){
+            throw new InvalidMoveException("illegal move");
+        }
+        if (promotion_type != null){
+            end_piece = new ChessPiece(teamTurn,promotion_type);
+            board.addPiece(end,end_piece);
+            board.addPiece(start,null);
+        }
+        else {
+            board.addPiece(end, piece);
+            board.addPiece(start, null);
+        }
+
         if (teamTurn == TeamColor.BLACK){
             teamTurn = TeamColor.WHITE;
         }
