@@ -71,22 +71,38 @@ public class MemoryDataAccess implements UserDAO,AuthDAO,GameDAO,ClearDAO{
 
     //Game methods
     public void createGame(GameData game) throws DataAccessException{
-        //should return int gameid
+        int id = game.gameID();
+        games.put(id,game);
     }
-    public GameData getGame(int gameID) throws DataAccessException{
 
+    public GameData getGame(int gameID) throws DataAccessException{
+        if (games.containsKey(gameID)) {
+            return games.get(gameID);
+        }
+        else {
+            throw new DataAccessException("Game does not exist");
+        }
     }
 
     public Collection<GameData> listGames() throws DataAccessException{
-
+        return games.values();
     }
-    public void updateGame(GameData game) throws DataAccessException{
 
+    public void updateGame(GameData game) throws DataAccessException{
+        int id = game.gameID();
+        if (games.containsKey(id)){
+            games.put(id,game);
+        }
+        else {
+            throw new DataAccessException("Game does not exist");
+        }
     }
 
     //clear method
     public void clear() throws DataAccessException{
-
+        users.clear();
+        auths.clear();
+        games.clear();
     }
 
 }
