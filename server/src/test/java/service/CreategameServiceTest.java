@@ -1,11 +1,11 @@
+package service;
+
 import dataaccess.MemoryDataAccess;
 import exception.ServiceException;
 import model.AuthData;
 import model.GameData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import service.CreategameService;
-import service.RegisterService;
 
 public class CreategameServiceTest {
 

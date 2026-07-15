@@ -1,3 +1,5 @@
+package service;
+
 import chess.ChessGame;
 import dataaccess.MemoryDataAccess;
 import exception.ServiceException;
@@ -5,8 +7,6 @@ import model.AuthData;
 import model.GameData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import service.ListgameService;
-import service.RegisterService;
 
 import java.util.Collection;
 

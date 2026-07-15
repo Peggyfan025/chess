@@ -1,11 +1,11 @@
+package service;
+
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import exception.ServiceException;
 import model.AuthData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import service.LogoutService;
-import service.RegisterService;
 
 public class LogoutServiceTest {
     @Test
