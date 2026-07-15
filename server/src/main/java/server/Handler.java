@@ -31,6 +31,17 @@ public class Handler {
         this.joingameService = joingameService;
     }
 
+    private void writeError(Context ctx, Exception e) {
+        if (e instanceof ServiceException se) {
+            ctx.status(se.getStatusCode());
+            ctx.result(serializer.toJson(new ErrorResult("Error: " + se.getMessage())));
+        }
+        else {
+            ctx.status(500);
+            ctx.result(serializer.toJson(new ErrorResult("Error: " + e.getMessage())));
+        }
+    }
+
     public void clear(Context ctx){
         try{
             clearService.clear();
@@ -55,13 +66,8 @@ public class Handler {
             ctx.status(200);
             ctx.result(serializer.toJson(result));
         }
-        catch (ServiceException e){
-            ctx.status(e.getStatusCode());
-            ctx.result(serializer.toJson(new ErrorResult("Error: " + e.getMessage())));
-        }
-        catch (DataAccessException e){
-            ctx.status(500);
-            ctx.result(serializer.toJson(new ErrorResult("Error: " + e.getMessage())));
+        catch (Exception e) {
+            writeError(ctx, e);
         }
     }
 
@@ -73,13 +79,8 @@ public class Handler {
             ctx.status(200);
             ctx.result(serializer.toJson(result));
         }
-        catch (ServiceException e) {
-            ctx.status(e.getStatusCode());
-            ctx.result(serializer.toJson(new ErrorResult("Error: " + e.getMessage())));
-        }
-        catch (DataAccessException e) {
-            ctx.status(500);
-            ctx.result(serializer.toJson(new ErrorResult("Error: " + e.getMessage())));
+        catch (Exception e) {
+            writeError(ctx, e);
         }
     }
 
@@ -90,13 +91,8 @@ public class Handler {
             ctx.status(200);
             ctx.result("{}");
         }
-        catch (ServiceException e) {
-            ctx.status(e.getStatusCode());
-            ctx.result(serializer.toJson(new ErrorResult("Error: " + e.getMessage())));
-        }
-        catch (DataAccessException e) {
-            ctx.status(500);
-            ctx.result(serializer.toJson(new ErrorResult("Error: " + e.getMessage())));
+        catch (Exception e) {
+            writeError(ctx, e);
         }
     }
 
@@ -115,13 +111,8 @@ public class Handler {
             ctx.status(200);
             ctx.result(serializer.toJson(result));
         }
-        catch (ServiceException e) {
-            ctx.status(e.getStatusCode());
-            ctx.result(serializer.toJson(new ErrorResult("Error: " + e.getMessage())));
-        }
-        catch (DataAccessException e) {
-            ctx.status(500);
-            ctx.result(serializer.toJson(new ErrorResult("Error: " + e.getMessage())));
+        catch (Exception e) {
+            writeError(ctx, e);
         }
     }
 
@@ -138,13 +129,8 @@ public class Handler {
             ctx.result(serializer.toJson(result));
 
         }
-        catch (ServiceException e) {
-            ctx.status(e.getStatusCode());
-            ctx.result(serializer.toJson(new ErrorResult("Error: " + e.getMessage())));
-        }
-        catch (DataAccessException e) {
-            ctx.status(500);
-            ctx.result(serializer.toJson(new ErrorResult("Error: " + e.getMessage())));
+        catch (Exception e) {
+            writeError(ctx, e);
         }
     }
 
@@ -157,13 +143,8 @@ public class Handler {
             ctx.status(200);
             ctx.result("{}");
         }
-        catch (ServiceException e) {
-            ctx.status(e.getStatusCode());
-            ctx.result(serializer.toJson(new ErrorResult("Error: " + e.getMessage())));
-        }
-        catch (DataAccessException e) {
-            ctx.status(500);
-            ctx.result(serializer.toJson(new ErrorResult("Error: " + e.getMessage())));
+        catch (Exception e) {
+            writeError(ctx, e);
         }
     }
 }

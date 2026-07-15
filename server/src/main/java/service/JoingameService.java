@@ -8,7 +8,7 @@ import exception.ServiceException;
 import model.AuthData;
 import model.GameData;
 
-public class JoingameService {
+public class JoingameService extends ServiceHelper{
 
     private final AuthDAO authDAO;
     private final GameDAO gameDAO;
@@ -22,13 +22,7 @@ public class JoingameService {
         if (playerColor == null || gameID == null) {
             throw new ServiceException(400, "bad request");
         }
-        AuthData auth;
-        try {
-            auth = authDAO.getAuth(authToken);
-        }
-        catch (DataAccessException e) {
-            throw new ServiceException(401, "unauthorized");
-        }
+        AuthData auth = verifyAuth(authDAO,authToken);
 
         GameData game;
         try {

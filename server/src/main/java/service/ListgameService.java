@@ -4,11 +4,12 @@ import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
 import exception.ServiceException;
+import model.AuthData;
 import model.GameData;
 
 import java.util.Collection;
 
-public class ListgameService {
+public class ListgameService extends ServiceHelper{
     private final AuthDAO authDAO;
     private final GameDAO gameDAO;
 
@@ -22,11 +23,7 @@ public class ListgameService {
             throw new ServiceException(401, "unauthorized");
         }
 
-        try {
-            authDAO.getAuth(authToken);
-        } catch (DataAccessException e) {
-            throw new ServiceException(401, "unauthorized");
-        }
+        AuthData auth = verifyAuth(authDAO,authToken);
 
         return gameDAO.listGames();
     }

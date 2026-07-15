@@ -9,7 +9,7 @@ import model.UserData;
 
 import java.util.UUID;
 
-public class LoginService {
+public class LoginService extends ServiceHelper{
     private final UserDAO userDAO;
     private final AuthDAO authDAO;
 

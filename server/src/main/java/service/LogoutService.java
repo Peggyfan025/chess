@@ -3,8 +3,9 @@ package service;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import exception.ServiceException;
+import model.AuthData;
 
-public class LogoutService {
+public class LogoutService extends ServiceHelper{
     private final AuthDAO authDAO;
 
     public LogoutService(AuthDAO authDAO) {
@@ -16,11 +17,7 @@ public class LogoutService {
             throw new ServiceException(401, "unauthorized");
         }
 
-        try {
-            authDAO.getAuth(authToken);
-        } catch (DataAccessException e) {
-            throw new ServiceException(401, "unauthorized");
-        }
+        AuthData auth = verifyAuth(authDAO,authToken);
         authDAO.deleteAuth(authToken);
     }
 }
