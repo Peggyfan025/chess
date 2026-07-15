@@ -14,21 +14,21 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
 
-        MemoryDataAccess MDA = new MemoryDataAccess();
+        MemoryDataAccess memoryDataAccess = new MemoryDataAccess();
         //clear
-        ClearService clearService = new ClearService(MDA);
+        ClearService clearService = new ClearService(memoryDataAccess);
         //register
-        RegisterService registerService = new RegisterService(MDA, MDA);
+        RegisterService registerService = new RegisterService(memoryDataAccess, memoryDataAccess);
         //login
-        LoginService loginService = new LoginService(MDA,MDA);
+        LoginService loginService = new LoginService(memoryDataAccess,memoryDataAccess);
         //logout
-        LogoutService logoutService = new LogoutService(MDA);
+        LogoutService logoutService = new LogoutService(memoryDataAccess);
         //list games
-        ListgameService listgameService = new ListgameService(MDA, MDA);
+        ListgameService listgameService = new ListgameService(memoryDataAccess, memoryDataAccess);
         //create game
-        CreategameService creategameService = new CreategameService(MDA,MDA);
+        CreategameService creategameService = new CreategameService(memoryDataAccess,memoryDataAccess);
         //join game
-        JoingameService joingameService = new JoingameService(MDA,MDA);
+        JoingameService joingameService = new JoingameService(memoryDataAccess,memoryDataAccess);
         Handler handler = new Handler(clearService,registerService,loginService,logoutService,listgameService, creategameService, joingameService);
         javalin.delete("/db", handler::clear);
         javalin.post("/user", handler::register);
