@@ -5,6 +5,8 @@ import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import io.javalin.*;
 import service.ClearService;
+import service.LoginService;
+import service.LogoutService;
 import service.RegisterService;
 
 public class Server {
@@ -20,9 +22,15 @@ public class Server {
         ClearService clearService = new ClearService(MDA);
         //register
         RegisterService registerService = new RegisterService(MDA, MDA);
-        Handler handler = new Handler(clearService,registerService);
+        //login
+        LoginService loginService = new LoginService(MDA,MDA);
+        //logout
+        LogoutService logoutService = new LogoutService(MDA);
+        Handler handler = new Handler(clearService,registerService,loginService,logoutService);
         javalin.delete("/db", handler::clear);
         javalin.post("/user", handler::register);
+        javalin.post("/session", handler::login);
+        javalin.delete("/session", handler::logout);
 
 
 
