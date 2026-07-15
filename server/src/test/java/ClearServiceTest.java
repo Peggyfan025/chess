@@ -1,4 +1,5 @@
 import chess.ChessGame;
+import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import model.AuthData;
 import model.GameData;
@@ -22,8 +23,8 @@ public class ClearServiceTest {
 
         clearService.clear();
 
-        Assertions.assertNull(dataAccess.getUser(user.username()),"user not removed");
-        Assertions.assertNull(dataAccess.getAuth(auth.authToken()),"auth not removed");
-        Assertions.assertNull(dataAccess.listGames().isEmpty(),"games where not removed");
+        Assertions.assertThrows(DataAccessException.class, () -> dataAccess.getUser(user.username()));
+        Assertions.assertThrows(DataAccessException.class, () -> dataAccess.getAuth(auth.authToken()));
+        Assertions.assertTrue(dataAccess.listGames().isEmpty(),"games where not removed");
     }
 }
