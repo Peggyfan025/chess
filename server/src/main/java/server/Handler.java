@@ -1,5 +1,6 @@
 package server;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import exception.ServiceException;
@@ -18,14 +19,16 @@ public class Handler {
     private final LogoutService logoutService;
     private final ListgameService listgameService;
     private final CreategameService creategameService;
+    private final JoingameService joingameService;
 
-    public Handler(ClearService clearService, RegisterService registerService, LoginService loginService, LogoutService logoutService, ListgameService listgameService, CreategameService creategameService){
+    public Handler(ClearService clearService, RegisterService registerService, LoginService loginService, LogoutService logoutService, ListgameService listgameService, CreategameService creategameService, JoingameService joingameService){
         this.clearService = clearService;
         this.registerService = registerService;
         this.loginService = loginService;
         this.logoutService = logoutService;
         this.listgameService = listgameService;
         this.creategameService = creategameService;
+        this.joingameService = joingameService;
     }
 
     public void clear(Context ctx){
@@ -123,15 +126,36 @@ public class Handler {
     }
 
     public record CreateGameRequest(String gameName) {}
+    public record CreateGameResult(int gameID) {}
     public void createGame(Context ctx) {
         try {
             String authToken = ctx.header("authorization");
             CreateGameRequest request = serializer.fromJson(ctx.body(), CreateGameRequest.class);
 
             int gameID = creategameService.createGame(authToken, request.gameName());
+            CreateGameResult result = new CreateGameResult(gameID);
             ctx.status(200);
-            ctx.result(serializer.toJson(gameID));
+            ctx.result(serializer.toJson(result));
 
+        }
+        catch (ServiceException e) {
+            ctx.status(e.getStatusCode());
+            ctx.result(serializer.toJson(new ErrorResult("Error: " + e.getMessage())));
+        }
+        catch (DataAccessException e) {
+            ctx.status(500);
+            ctx.result(serializer.toJson(new ErrorResult("Error: " + e.getMessage())));
+        }
+    }
+
+    public record JoinGameRequest(ChessGame.TeamColor playerColor, Integer gameID) {}
+    public void joinGame(Context ctx) {
+        try {
+            String authToken = ctx.header("authorization");
+            JoinGameRequest request = serializer.fromJson(ctx.body(), JoinGameRequest.class);
+            joingameService.joinGame(authToken, request.playerColor(), request.gameID());
+            ctx.status(200);
+            ctx.result("{}");
         }
         catch (ServiceException e) {
             ctx.status(e.getStatusCode());
