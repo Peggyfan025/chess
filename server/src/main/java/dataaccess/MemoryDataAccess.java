@@ -12,6 +12,7 @@ public class MemoryDataAccess implements UserDAO,AuthDAO,GameDAO,ClearDAO{
     private Map<String, UserData> users;
     private Map<String, AuthData> auths;
     private Map<Integer, GameData> games;
+    private int nextGameID = 1;
 
     public MemoryDataAccess(){
         users = new HashMap<>();
@@ -70,9 +71,12 @@ public class MemoryDataAccess implements UserDAO,AuthDAO,GameDAO,ClearDAO{
     }
 
     //Game methods
-    public void createGame(GameData game) throws DataAccessException{
-        int id = game.gameID();
-        games.put(id,game);
+    public int createGame(GameData game) throws DataAccessException{
+        int id = nextGameID;
+        nextGameID++;
+        GameData stored_game = new GameData(id,game.whiteUsername(),game.blackUsername(),game.gameName(),game.game());
+        games.put(id,stored_game);
+        return id;
     }
 
     public GameData getGame(int gameID) throws DataAccessException{
@@ -103,6 +107,7 @@ public class MemoryDataAccess implements UserDAO,AuthDAO,GameDAO,ClearDAO{
         users.clear();
         auths.clear();
         games.clear();
+        nextGameID = 1;
     }
 
 }
