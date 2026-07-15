@@ -20,7 +20,7 @@ public class Handler {
         }
         catch (DataAccessException e) {
            ctx.status(500);
-           ctx.result("{\"message\":\"Error:" + e.getMessage()+"\"}");
+           ctx.result("{\"message\":\"Error: " + e.getMessage()+"\"}");
         }
     }
 }
