@@ -54,7 +54,7 @@ public class MemoryDataAccess implements UserDAO,AuthDAO,GameDAO,ClearDAO{
     public void createUser(UserData user) throws DataAccessException{
         String username = user.username();
         if (users.containsKey(username)){
-            throw new DataAccessException("Username taken");
+            throw new DataAccessException("Username already exists");
         }
         else {
             users.put(username,user);
