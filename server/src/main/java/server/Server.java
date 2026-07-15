@@ -5,6 +5,7 @@ import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import io.javalin.*;
 import service.ClearService;
+import service.RegisterService;
 
 public class Server {
 
@@ -13,11 +14,17 @@ public class Server {
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
-        //clear
+
         MemoryDataAccess MDA = new MemoryDataAccess();
+        //clear
         ClearService clearService = new ClearService(MDA);
-        Handler handler = new Handler(clearService);
+        //register
+        RegisterService registerService = new RegisterService(MDA, MDA);
+        Handler handler = new Handler(clearService,registerService);
         javalin.delete("/db", handler::clear);
+        javalin.post("/user", handler::register);
+
+
 
 
     }
