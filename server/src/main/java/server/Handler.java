@@ -5,22 +5,25 @@ import dataaccess.DataAccessException;
 import exception.ServiceException;
 import io.javalin.http.Context;
 import model.AuthData;
-import service.ClearService;
-import service.LoginService;
-import service.LogoutService;
-import service.RegisterService;
+import model.GameData;
+import service.*;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class Handler {
     private final ClearService clearService;
     private final RegisterService registerService;
     private final LoginService loginService;
     private final LogoutService logoutService;
+    private final ListgameService listgameService;
 
-    public Handler(ClearService clearService, RegisterService registerService, LoginService loginService,LogoutService logoutService){
+    public Handler(ClearService clearService, RegisterService registerService, LoginService loginService, LogoutService logoutService, ListgameService listgameService){
         this.clearService = clearService;
         this.registerService = registerService;
         this.loginService = loginService;
         this.logoutService = logoutService;
+        this.listgameService = listgameService;
     }
 
     public void clear(Context ctx){
@@ -81,6 +84,31 @@ public class Handler {
             logoutService.logout(authToken);
             ctx.status(200);
             ctx.result("{}");
+        }
+        catch (ServiceException e) {
+            ctx.status(e.getStatusCode());
+            ctx.result(serializer.toJson(new ErrorResult("Error: " + e.getMessage())));
+        }
+        catch (DataAccessException e) {
+            ctx.status(500);
+            ctx.result(serializer.toJson(new ErrorResult("Error: " + e.getMessage())));
+        }
+    }
+
+    public record GameListEntry(int gameID, String whiteUsername, String blackUsername, String gameName) {}
+    public record ListGamesResult(Collection<GameListEntry> games) {}
+
+    public void listGames(Context ctx) {
+        try {
+            String authToken = ctx.header("authorization");
+            Collection<GameData> games = listgameService.listGames(authToken);
+            Collection<GameListEntry> gameList = new ArrayList<>();
+            for (GameData game : games) {
+                gameList.add(new GameListEntry(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName()));
+            }
+            ListGamesResult result = new ListGamesResult(gameList);
+            ctx.status(200);
+            ctx.result(serializer.toJson(result));
         }
         catch (ServiceException e) {
             ctx.status(e.getStatusCode());

@@ -4,10 +4,7 @@ import dataaccess.ClearDAO;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import io.javalin.*;
-import service.ClearService;
-import service.LoginService;
-import service.LogoutService;
-import service.RegisterService;
+import service.*;
 
 public class Server {
 
@@ -26,14 +23,14 @@ public class Server {
         LoginService loginService = new LoginService(MDA,MDA);
         //logout
         LogoutService logoutService = new LogoutService(MDA);
-        Handler handler = new Handler(clearService,registerService,loginService,logoutService);
+        //list games
+        ListgameService listgameService = new ListgameService(MDA, MDA);
+        Handler handler = new Handler(clearService,registerService,loginService,logoutService,listgameService);
         javalin.delete("/db", handler::clear);
         javalin.post("/user", handler::register);
         javalin.post("/session", handler::login);
         javalin.delete("/session", handler::logout);
-
-
-
+        javalin.get("/game", handler::listGames);
 
     }
 
