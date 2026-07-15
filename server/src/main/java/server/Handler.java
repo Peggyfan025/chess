@@ -17,13 +17,15 @@ public class Handler {
     private final LoginService loginService;
     private final LogoutService logoutService;
     private final ListgameService listgameService;
+    private final CreategameService creategameService;
 
-    public Handler(ClearService clearService, RegisterService registerService, LoginService loginService, LogoutService logoutService, ListgameService listgameService){
+    public Handler(ClearService clearService, RegisterService registerService, LoginService loginService, LogoutService logoutService, ListgameService listgameService, CreategameService creategameService){
         this.clearService = clearService;
         this.registerService = registerService;
         this.loginService = loginService;
         this.logoutService = logoutService;
         this.listgameService = listgameService;
+        this.creategameService = creategameService;
     }
 
     public void clear(Context ctx){
@@ -109,6 +111,27 @@ public class Handler {
             ListGamesResult result = new ListGamesResult(gameList);
             ctx.status(200);
             ctx.result(serializer.toJson(result));
+        }
+        catch (ServiceException e) {
+            ctx.status(e.getStatusCode());
+            ctx.result(serializer.toJson(new ErrorResult("Error: " + e.getMessage())));
+        }
+        catch (DataAccessException e) {
+            ctx.status(500);
+            ctx.result(serializer.toJson(new ErrorResult("Error: " + e.getMessage())));
+        }
+    }
+
+    public record CreateGameRequest(String gameName) {}
+    public void createGame(Context ctx) {
+        try {
+            String authToken = ctx.header("authorization");
+            CreateGameRequest request = serializer.fromJson(ctx.body(), CreateGameRequest.class);
+
+            int gameID = creategameService.createGame(authToken, request.gameName());
+            ctx.status(200);
+            ctx.result(serializer.toJson(gameID));
+
         }
         catch (ServiceException e) {
             ctx.status(e.getStatusCode());
