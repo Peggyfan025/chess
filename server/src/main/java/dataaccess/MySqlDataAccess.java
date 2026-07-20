@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -60,8 +61,9 @@ public class MySqlDataAccess implements UserDAO,AuthDAO,GameDAO,ClearDAO{
             INSERT INTO user (username, password, email)
             VALUES (?, ?, ?)
             """;
-
-        executeUpdate(statement, user.username(), user.password(), user.email());
+        String password = user.password();
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+        executeUpdate(statement, user.username(), hashedPassword, user.email());
     }
 
     public UserData getUser(String username) throws DataAccessException{
