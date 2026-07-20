@@ -7,9 +7,8 @@ import model.GameData;
 import model.UserData;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Collection;
-
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
 public class MySqlDataAccess implements UserDAO,AuthDAO,GameDAO,ClearDAO{
     public MySqlDataAccess() throws DataAccessException{
@@ -47,7 +46,12 @@ public class MySqlDataAccess implements UserDAO,AuthDAO,GameDAO,ClearDAO{
     }
 
     public void deleteAuth(String authToken) throws DataAccessException{
+        String statement = """
+            DELETE FROM auth
+            WHERE authToken = ?
+            """;
 
+        executeUpdate(statement, authToken);
     }
 
     //User methods
@@ -115,16 +119,46 @@ public class MySqlDataAccess implements UserDAO,AuthDAO,GameDAO,ClearDAO{
     }
 
     public Collection<GameData> listGames() throws DataAccessException{
+        String statement = "SELECT ... FROM game";
 
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(statement)) {
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+                Collection<GameData> games = new ArrayList<>();
+
+                while (rs.next()) {
+                    String gameJson = rs. getString("game");
+                    ChessGame game = gson.fromJson(gameJson, ChessGame.class);
+                    GameData gameData = new GameData(rs.getInt("gameID"), rs.getString("whiteUsername"), rs.getString("blackUsername"), rs.getString("gameName"),game);
+                    games.add(gameData);
+                }
+                return games;
+            }
+        }
+        catch (SQLException ex) {
+            throw new DataAccessException(String.format("Unable to get user: %s", ex.getMessage()),ex);
+        }
     }
 
     public void updateGame(GameData game) throws DataAccessException{
-
+        String statement = """
+            UPDATE game
+            SET whiteUsername = ?,
+                blackUsername = ?,
+                gameName = ?,
+                game = ?
+            WHERE gameID = ?
+            """;
+        executeUpdate(statement, game.whiteUsername(), game.blackUsername(), game.gameName(), gson.toJson(game.game()), game.gameID());
     }
 
     //clear method
     public void clear() throws DataAccessException{
-
+        executeUpdate("DELETE FROM auth");
+        executeUpdate("DELETE FROM game");
+        executeUpdate("DELETE FROM user");
     }
 
 
