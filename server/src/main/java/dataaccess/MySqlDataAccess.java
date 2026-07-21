@@ -121,7 +121,7 @@ public class MySqlDataAccess implements UserDAO,AuthDAO,GameDAO,ClearDAO{
     }
 
     public Collection<GameData> listGames() throws DataAccessException{
-        String statement = "SELECT ... FROM game";
+        String statement = "SELECT * FROM game";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(statement)) {

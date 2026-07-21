@@ -8,12 +8,14 @@ import model.AuthData;
 public abstract class ServiceHelper {
 
     protected AuthData verifyAuth(AuthDAO authDAO, String authToken)
-            throws ServiceException {
+            throws ServiceException, DataAccessException {
 
-        try {
-            return authDAO.getAuth(authToken);
-        } catch (DataAccessException e) {
+        AuthData auth = authDAO.getAuth(authToken);
+
+        if (auth == null) {
             throw new ServiceException(401, "unauthorized");
         }
+
+        return auth;
     }
 }

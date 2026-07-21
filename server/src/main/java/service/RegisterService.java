@@ -19,16 +19,17 @@ public class RegisterService {
     }
 
     public AuthData register(String username, String password, String email) throws DataAccessException, ServiceException {
-        UserData new_user = new UserData(username,password,email);
         if (username == null || password == null || email == null) {
             throw new ServiceException(400, "bad request");
         }
-        try{
-            userDAO.createUser(new_user);
-        }
-        catch (DataAccessException e){
+        UserData existingUser = userDAO.getUser(username);
+
+        if (existingUser != null) {
             throw new ServiceException(403, "already taken");
         }
+
+        UserData new_user = new UserData(username,password,email);
+        userDAO.createUser(new_user);
 
         String authToken = UUID.randomUUID().toString();
         AuthData new_auth = new AuthData(authToken,username);
