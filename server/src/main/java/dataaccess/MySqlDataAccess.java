@@ -110,7 +110,8 @@ public class MySqlDataAccess implements UserDAO,AuthDAO,GameDAO,ClearDAO{
                 if (rs.next()) {
                     String gameJson = rs. getString("game");
                     ChessGame game = gson.fromJson(gameJson, ChessGame.class);
-                    return new GameData(rs.getInt("gameID"), rs.getString("whiteUsername"), rs.getString("blackUsername"), rs.getString("gameName"),game);
+                    return new GameData(rs.getInt("gameID"), rs.getString("whiteUsername"),
+                            rs.getString("blackUsername"), rs.getString("gameName"),game);
                 }
             }
             return null;
@@ -133,7 +134,8 @@ public class MySqlDataAccess implements UserDAO,AuthDAO,GameDAO,ClearDAO{
                 while (rs.next()) {
                     String gameJson = rs. getString("game");
                     ChessGame game = gson.fromJson(gameJson, ChessGame.class);
-                    GameData gameData = new GameData(rs.getInt("gameID"), rs.getString("whiteUsername"), rs.getString("blackUsername"), rs.getString("gameName"),game);
+                    GameData gameData = new GameData(rs.getInt("gameID"), rs.getString("whiteUsername"), rs.getString("blackUsername"),
+                            rs.getString("gameName"),game);
                     games.add(gameData);
                 }
                 return games;

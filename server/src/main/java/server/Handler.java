@@ -21,7 +21,9 @@ public class Handler {
     private final CreategameService creategameService;
     private final JoingameService joingameService;
 
-    public Handler(ClearService clearService, RegisterService registerService, LoginService loginService, LogoutService logoutService, ListgameService listgameService, CreategameService creategameService, JoingameService joingameService){
+    public Handler(ClearService clearService, RegisterService registerService,
+                   LoginService loginService, LogoutService logoutService,
+                   ListgameService listgameService, CreategameService creategameService, JoingameService joingameService){
         this.clearService = clearService;
         this.registerService = registerService;
         this.loginService = loginService;

@@ -33,7 +33,8 @@ public class Server {
             CreategameService creategameService = new CreategameService(sqlDataAccess,sqlDataAccess);
             //join game
             JoingameService joingameService = new JoingameService(sqlDataAccess,sqlDataAccess);
-            Handler handler = new Handler(clearService,registerService,loginService,logoutService,listgameService, creategameService, joingameService);
+            Handler handler = new Handler(clearService,registerService,loginService,logoutService,
+                    listgameService, creategameService, joingameService);
             javalin.delete("/db", handler::clear);
             javalin.post("/user", handler::register);
             javalin.post("/session", handler::login);

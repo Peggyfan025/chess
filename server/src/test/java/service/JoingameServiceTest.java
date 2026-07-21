@@ -40,7 +40,8 @@ public class JoingameServiceTest {
         int gameID = creategameService.createGame(firstAuth.authToken(), "Test Game");
         joingameService.joinGame(firstAuth.authToken(), ChessGame.TeamColor.WHITE, gameID);
 
-        ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> joingameService.joinGame(secondAuth.authToken(), ChessGame.TeamColor.WHITE, gameID));
+        ServiceException exception = Assertions.assertThrows(ServiceException.class, () -> joingameService.joinGame(secondAuth.authToken(),
+                ChessGame.TeamColor.WHITE, gameID));
 
         Assertions.assertEquals(403, exception.getStatusCode());
         Assertions.assertEquals("already taken", exception.getMessage());
