@@ -24,14 +24,9 @@ public class LoginService extends ServiceHelper{
             throw new ServiceException(400, "bad request");
         }
 
-        UserData user;
-        try {
-            user = userDAO.getUser(username);
-        } catch (DataAccessException e) {
-            throw new ServiceException(401, "unauthorized");
-        }
+        UserData user = userDAO.getUser(username);
 
-        if (!BCrypt.checkpw(password, user.password())) {
+        if (user == null || !BCrypt.checkpw(password, user.password())) {
             throw new ServiceException(401, "unauthorized");
         }
 
