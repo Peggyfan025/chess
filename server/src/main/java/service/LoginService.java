@@ -6,6 +6,7 @@ import dataaccess.UserDAO;
 import exception.ServiceException;
 import model.AuthData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.UUID;
 
@@ -30,7 +31,7 @@ public class LoginService extends ServiceHelper{
             throw new ServiceException(401, "unauthorized");
         }
 
-        if (!user.password().equals(password)) {
+        if (!BCrypt.checkpw(password, user.password())) {
             throw new ServiceException(401, "unauthorized");
         }
 
