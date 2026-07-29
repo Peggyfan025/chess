@@ -72,7 +72,21 @@ public class ServerFacade {
             int statusCode = connection.getResponseCode();
 
             if (statusCode != 200) {
-                throw new ResponseException("Request failed with status code " + statusCode);
+                try (InputStreamReader reader = new InputStreamReader(connection.getErrorStream())) {
+                    JsonObject error = serializer.fromJson(reader, JsonObject.class);
+                    String message = "Request failed.";
+
+                    if (error != null && error.has("message")) {
+                        message = error.get("message").getAsString();
+                    }
+
+
+                    if (message.startsWith("Error: ")) {
+                        message = message.substring(7);
+                    }
+
+                    throw new ResponseException(message);
+                }
             }
 
             if (responseClass == null) {
