@@ -54,6 +54,9 @@ public class ChessClient {
         catch (ResponseException | IllegalArgumentException e) {
             return "Error: " + e.getMessage();
         }
+        catch (Exception e) {
+            return "Error: unable to process that command.";
+        }
     }
 
     public String help() {
