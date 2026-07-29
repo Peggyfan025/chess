@@ -128,7 +128,115 @@ public class ChessClient {
         return "Created game: " + gameName + ".";
     }
 
+    private String listGames(String... params) throws ResponseException {
+        assertSignedIn();
 
+        if (params.length != 0) {
+            throw new IllegalArgumentException("Expected: list");
+        }
+
+        listedGames = new ArrayList<>(server.listGames(authToken));
+
+        if (listedGames.isEmpty()) {
+            return "No games available.";
+        }
+
+        StringBuilder result = new StringBuilder();
+
+        for (int i = 0; i < listedGames.size(); i++) {
+            GameData game = listedGames.get(i);
+
+            String whitePlayer = game.whiteUsername() == null
+                    ? "available"
+                    : game.whiteUsername();
+
+            String blackPlayer = game.blackUsername() == null
+                    ? "available"
+                    : game.blackUsername();
+
+            result.append(i + 1)
+                    .append(". ")
+                    .append(game.gameName())
+                    .append(" | White: ")
+                    .append(whitePlayer)
+                    .append(" | Black: ")
+                    .append(blackPlayer);
+
+            if (i < listedGames.size() - 1) {
+                result.append("\n");
+            }
+        }
+        return result.toString();
+    }
+    private String playGame(String... params) throws ResponseException {
+        assertSignedIn();
+
+        if (params.length != 2) {
+            throw new IllegalArgumentException("Expected: play <GAME NUMBER> <WHITE|BLACK>");
+        }
+
+        if (listedGames.isEmpty()) {
+            throw new IllegalArgumentException("Run list before playing a game.");
+        }
+
+        int gameNumber;
+
+        try {
+            gameNumber = Integer.parseInt(params[0]);
+        }
+        catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Game number must be an integer.");
+        }
+
+        if (gameNumber < 1 || gameNumber > listedGames.size()) {
+            throw new IllegalArgumentException("Invalid game number.");
+        }
+
+        ChessGame.TeamColor color;
+
+        try {
+            color = ChessGame.TeamColor.valueOf(
+                    params[1].toUpperCase());
+        }
+        catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                    "Color must be WHITE or BLACK.");
+        }
+
+        GameData game = listedGames.get(gameNumber - 1);
+        server.joinGame(authToken, game.gameID(), color);
+
+        return "Joined " + game.gameName() + " as " + color + ".";
+    }
+
+    private String observeGame(String... params){
+        assertSignedIn();
+
+        if (params.length != 1) {
+            throw new IllegalArgumentException(
+                    "Expected: observe <GAME NUMBER>");
+        }
+
+        if (listedGames.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Run list before observing a game.");
+        }
+
+        int gameNumber;
+        try {
+            gameNumber = Integer.parseInt(params[0]);
+        }
+        catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Game number must be an integer.");
+        }
+
+        if (gameNumber < 1 || gameNumber > listedGames.size()) {
+            throw new IllegalArgumentException("Invalid game number.");
+        }
+
+        GameData game = listedGames.get(gameNumber - 1);
+        return "Observing " + game.gameName() + ".";
+    }
 
     private void assertSignedIn() {
         if (state != State.SIGNED_IN) {
