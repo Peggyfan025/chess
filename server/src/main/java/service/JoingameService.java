@@ -34,13 +34,13 @@ public class JoingameService extends ServiceHelper{
 
         if (playerColor == ChessGame.TeamColor.WHITE) {
             if (game.whiteUsername() != null) {
-                throw new ServiceException(403, "already taken");
+                throw new ServiceException(403, "White already taken");
             }
             game = new GameData(game.gameID(), auth.username(), game.blackUsername(), game.gameName(), game.game());
         }
         else {
             if (game.blackUsername() != null) {
-                throw new ServiceException(403, "already taken");
+                throw new ServiceException(403, "Black already taken");
             }
             game = new GameData(game.gameID(), game.whiteUsername(), auth.username(), game.gameName(), game.game());
         }

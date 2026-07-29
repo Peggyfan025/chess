@@ -27,7 +27,7 @@ public class LoginService extends ServiceHelper{
         UserData user = userDAO.getUser(username);
 
         if (user == null || !BCrypt.checkpw(password, user.password())) {
-            throw new ServiceException(401, "unauthorized");
+            throw new ServiceException(401, "Wrong username or password");
         }
 
         String authToken = UUID.randomUUID().toString();
