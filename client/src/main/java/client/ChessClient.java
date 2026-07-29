@@ -4,6 +4,7 @@ package client;
 import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
+import ui.BoardDrawer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -206,7 +207,8 @@ public class ChessClient {
         GameData game = listedGames.get(gameNumber - 1);
         server.joinGame(authToken, game.gameID(), color);
 
-        return "Joined " + game.gameName() + " as " + color + ".";
+        return "Joined " + game.gameName() + " as " + color + ".\n"
+                + BoardDrawer.drawBoard(color);
     }
 
     private String observeGame(String... params){
@@ -235,7 +237,8 @@ public class ChessClient {
         }
 
         GameData game = listedGames.get(gameNumber - 1);
-        return "Observing " + game.gameName() + ".";
+        return "Observing " + game.gameName() + ".\n"
+                + BoardDrawer.drawBoard(ChessGame.TeamColor.WHITE);
     }
 
     private void assertSignedIn() {

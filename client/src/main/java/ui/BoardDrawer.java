@@ -26,6 +26,7 @@ public class BoardDrawer {
             }
             appendRow(result, board, row, perspective);
         }
+        // for having lable bottom and top
         appendColumnLabels(result, perspective);
         result.append(RESET_BG_COLOR);
         result.append(RESET_TEXT_COLOR);
