@@ -34,7 +34,6 @@ public class BoardDrawer {
     }
 
     private static void appendRow(StringBuilder result, ChessBoard board, int row, ChessGame.TeamColor perspective) {
-
         result.append(RESET_BG_COLOR);
         result.append(SET_TEXT_COLOR_WHITE);
         result.append(" ").append(row).append(" ");
