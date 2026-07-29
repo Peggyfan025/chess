@@ -91,7 +91,7 @@ public class ChessClient {
         authToken = authData.authToken();
         state = State.SIGNED_IN;
 
-        return "Registered and signed in as " + authData.username() + ".";
+        return "Registered and signed in as " + authData.username() + ".\n"+help();
     }
 
     private String login(String...params) throws ResponseException {
@@ -104,7 +104,7 @@ public class ChessClient {
 
         authToken = authData.authToken();
         state = State.SIGNED_IN;
-        return "Signed in as " + authData.username() + ".";
+        return "Signed in as " + authData.username() + ".\n"+ help();
     }
 
     private String logout(String... params) throws ResponseException {
@@ -117,7 +117,7 @@ public class ChessClient {
         authToken = null;
         listedGames.clear();
         state = State.SIGNED_OUT;
-        return "Signed out successfully.";
+        return "Signed out successfully.\n"+help();
     }
     private String createGame(String... params) throws ResponseException {
         assertSignedIn();
