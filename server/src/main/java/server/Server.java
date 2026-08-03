@@ -5,6 +5,8 @@ import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import dataaccess.MySqlDataAccess;
 import io.javalin.*;
+import server.websocket.ConnectionManager;
+import server.websocket.WebSocketHandler;
 import service.*;
 
 public class Server {
@@ -42,12 +44,13 @@ public class Server {
             javalin.get("/game", handler::listGames);
             javalin.post("/game", handler::createGame);
             javalin.put("/game", handler::joinGame);
+            //websocket
+            ConnectionManager connectionManager = new ConnectionManager();
+            WebSocketHandler webSocketHandler = new WebSocketHandler(connectionManager);
+            javalin.ws("/ws", webSocketHandler::configure);
         }
         catch (DataAccessException ex) {
-            throw new RuntimeException(
-                    "Unable to initialize database",
-                    ex
-            );
+            throw new RuntimeException("Unable to initialize database", ex);
         }
 
 
