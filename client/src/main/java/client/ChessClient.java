@@ -7,6 +7,7 @@ import client.websocket.WebSocketCommunicator;
 import model.AuthData;
 import model.GameData;
 import ui.BoardDrawer;
+import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
 import java.util.ArrayList;
@@ -19,10 +20,14 @@ public class ChessClient implements ServerMessageObserver {
     private State state = State.SIGNED_OUT;
     private String authToken;
     private List<GameData> listedGames = new ArrayList<>();
+    private int currentGameID;
+    private ChessGame.TeamColor perspective;
+    private boolean observing;
 
     private enum State {
         SIGNED_OUT,
-        SIGNED_IN
+        SIGNED_IN,
+        GAMEPLAY
     }
 
     public ChessClient(ServerFacade server, int port) {
@@ -220,8 +225,15 @@ public class ChessClient implements ServerMessageObserver {
         GameData game = listedGames.get(gameNumber - 1);
         server.joinGame(authToken, game.gameID(), color);
 
-        return "Joined " + game.gameName() + " as " + color + ".\n"
-                + BoardDrawer.drawBoard(color);
+        websocket.connect();
+        UserGameCommand connectCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken,game.gameID());
+        websocket.send(connectCommand);
+        currentGameID = game.gameID();
+        perspective = color;
+        observing = false;
+        state = State.GAMEPLAY;
+
+        return "Connected to" + game.gameName() + "as" + color + ".";
     }
 
     private String observeGame(String... params){
