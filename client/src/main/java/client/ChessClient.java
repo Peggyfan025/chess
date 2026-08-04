@@ -2,11 +2,15 @@ package client;
 
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import client.websocket.ServerMessageObserver;
 import client.websocket.WebSocketCommunicator;
 import model.AuthData;
 import model.GameData;
 import ui.BoardDrawer;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
@@ -147,15 +151,33 @@ public class ChessClient implements ServerMessageObserver {
         return BoardDrawer.drawBoard(currentGame.getBoard(), perspective);
     }
 
-    private String makeMove(String... params) {
+    private String makeMove(String... params) throws ResponseException {
         assertInGame();
+        if (observing) {
+            throw new IllegalArgumentException(
+                    "Observers cannot make moves."
+            );
+        }
 
         if (params.length != 2 && params.length != 3) {
             throw new IllegalArgumentException(
                     "Expected: move <START> <END> [PROMOTION]");
         }
 
-        return "Making moves will be completed later.";
+        ChessPosition startPosition = parsePosition(params[0]);
+        ChessPosition endPosition = parsePosition(params[1]);
+
+        ChessPiece.PieceType promotionPiece = null;
+
+        if (params.length == 3) {
+            promotionPiece = parsePromotionPiece(params[2]);
+        }
+
+        ChessMove move = new ChessMove(startPosition, endPosition, promotionPiece);
+        MakeMoveCommand command = new MakeMoveCommand(authToken, currentGameID, move);
+        websocket.send(command);
+
+        return "";
     }
 
     private String leaveGame(String... params) {
@@ -393,8 +415,39 @@ public class ChessClient implements ServerMessageObserver {
 
     private void assertInGame(){
         if (state != State.GAMEPLAY) {
+            throw new IllegalArgumentException("You must be in a game first.");
+        }
+    }
+
+    private ChessPosition parsePosition(String input) {
+        if (input == null || input.length() != 2) {
+            throw new IllegalArgumentException("Position must be written like e2.");
+        }
+
+        char columnLetter = Character.toLowerCase(input.charAt(0));
+        char rowCharacter = input.charAt(1);
+
+        if (columnLetter < 'a' || columnLetter > 'h' || rowCharacter < '1' || rowCharacter > '8') {
+            throw new IllegalArgumentException("Position must be between a1 and h8.");
+        }
+        int column = columnLetter - 'a' + 1;
+        int row = rowCharacter - '0';
+
+        return new ChessPosition(row, column);
+    }
+
+    private ChessPiece.PieceType parsePromotionPiece(String input) {
+        try {
+            ChessPiece.PieceType piece = ChessPiece.PieceType.valueOf(input.toUpperCase());
+            if (piece == ChessPiece.PieceType.KING || piece == ChessPiece.PieceType.PAWN) {
+                throw new IllegalArgumentException("Promotion must be QUEEN, ROOK, BISHOP, or KNIGHT.");
+            }
+            return piece;
+
+        }
+        catch (IllegalArgumentException exception) {
             throw new IllegalArgumentException(
-                    "You must be in a game first.");
+                    "Promotion must be QUEEN, ROOK, BISHOP, or KNIGHT.");
         }
     }
 }
