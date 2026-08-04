@@ -20,7 +20,6 @@ public class ConnectionManager {
     }
 
     public void send(WsContext context, Object message) {
-
         if (context.session.isOpen()) {
             context.send(serializer.toJson(message));
         }
