@@ -59,7 +59,7 @@ public class WebSocketHandler {
                                 ctx.message(), MakeMoveCommand.class);
                     makeMove(ctx, moveCommand);
                 }
-                case LEAVE -> System.out.println("LEAVE command received");
+                case LEAVE -> leave(ctx, command);
                 case RESIGN -> System.out.println("RESIGN command received");
             }
 
@@ -208,6 +208,65 @@ public class WebSocketHandler {
         }
         catch (DataAccessException exception) {
             sendError(ctx, "Unable to update the game.");
+        }
+    }
+
+    private void leave(WsMessageContext ctx, UserGameCommand command) {
+        try {
+            String authToken = command.getAuthToken();
+            Integer gameID = command.getGameID();
+
+            if (authToken == null || authToken.isBlank()) {
+                sendError(ctx, "Invalid authentication token.");
+                return;
+            }
+
+            if (gameID == null) {
+                sendError(ctx, "Invalid game ID.");
+                return;
+            }
+
+            AuthData authData = authDAO.getAuth(authToken);
+            if (authData == null) {
+                sendError(ctx, "Invalid authentication token.");
+                return;
+            }
+
+            GameData gameData = gameDAO.getGame(gameID);
+
+            if (gameData == null) {
+                sendError(ctx, "Game does not exist.");
+                return;
+            }
+
+            String username = authData.username();
+            String whiteUsername = gameData.whiteUsername();
+            String blackUsername = gameData.blackUsername();
+
+            boolean gameChanged = false;
+
+            if (username.equals(whiteUsername)) {
+                whiteUsername = null;
+                gameChanged = true;
+
+            }
+            else if (username.equals(blackUsername)) {
+                blackUsername = null;
+                gameChanged = true;
+            }
+
+            if (gameChanged) {
+                GameData updatedGame = new GameData(gameData.gameID(), whiteUsername,
+                    blackUsername, gameData.gameName(), gameData.game());
+                gameDAO.updateGame(updatedGame);
+            }
+
+            connections.remove(ctx);
+            ServerMessage notification = ServerMessage.notification(username + " left the game.");
+            connections.broadcast(gameID, notification, null);
+        }
+        catch (DataAccessException exception) {
+            sendError(ctx, "Unable to leave the game.");
         }
     }
 

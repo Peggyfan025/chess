@@ -180,16 +180,26 @@ public class ChessClient implements ServerMessageObserver {
         return "";
     }
 
-    private String leaveGame(String... params) {
+    private String leaveGame(String... params) throws ResponseException {
         assertInGame();
 
         if (params.length != 0) {
-            throw new IllegalArgumentException(
-                    "Expected: leave"
-            );
+            throw new IllegalArgumentException("Expected: leave");
         }
 
-        return "Leaving the game will be completed later.";
+        UserGameCommand command = new UserGameCommand(
+                    UserGameCommand.CommandType.LEAVE, authToken, currentGameID);
+
+        websocket.send(command);
+
+        currentGameID = 0;
+        currentGame = null;
+        perspective = null;
+        observing = false;
+        listedGames.clear();
+        state = State.SIGNED_IN;
+
+        return "Left the game.\n" + help();
     }
 
     private String resign(String... params) {
@@ -254,6 +264,9 @@ public class ChessClient implements ServerMessageObserver {
         }
 
         server.logout(authToken);
+        if (websocket.isOpen()) {
+            websocket.close();
+        }
         authToken = null;
         listedGames.clear();
         state = State.SIGNED_OUT;
