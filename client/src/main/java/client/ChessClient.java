@@ -3,6 +3,7 @@ package client;
 
 import chess.ChessGame;
 import client.websocket.ServerMessageObserver;
+import client.websocket.WebSocketCommunicator;
 import model.AuthData;
 import model.GameData;
 import ui.BoardDrawer;
@@ -14,6 +15,7 @@ import java.util.List;
 
 public class ChessClient implements ServerMessageObserver {
     private final ServerFacade server;
+    private final WebSocketCommunicator websocket;
     private State state = State.SIGNED_OUT;
     private String authToken;
     private List<GameData> listedGames = new ArrayList<>();
@@ -23,8 +25,9 @@ public class ChessClient implements ServerMessageObserver {
         SIGNED_IN
     }
 
-    public ChessClient(ServerFacade server) {
+    public ChessClient(ServerFacade server, int port) {
         this.server = server;
+        this.websocket = new WebSocketCommunicator(port, this);
     }
 
     @Override
