@@ -21,6 +21,7 @@ public class ChessClient implements ServerMessageObserver {
     private String authToken;
     private List<GameData> listedGames = new ArrayList<>();
     private int currentGameID;
+    private ChessGame currentGame;
     private ChessGame.TeamColor perspective;
     private boolean observing;
 
@@ -60,6 +61,13 @@ public class ChessClient implements ServerMessageObserver {
                 case "list" -> listGames(params);
                 case "play" -> playGame(params);
                 case "observe" -> observeGame(params);
+
+                case "redraw" -> redraw(params);
+                case "leave" -> leaveGame(params);
+                case "move" -> makeMove(params);
+                case "resign" -> resign(params);
+                case "highlight" -> highlightMoves(params);
+
                 case "help" -> help();
                 case "quit" -> "quit";
                 default -> "Unknown command. Type help to see available commands.";
@@ -83,17 +91,89 @@ public class ChessClient implements ServerMessageObserver {
                 quit - exit the program
                 """;
         }
-
+        if (state == State.SIGNED_IN) {
+            return """
+                    create <GAME NAME> - create a chess game
+                    list - list available games
+                    play <GAME NUMBER> <WHITE|BLACK> - join a game
+                    observe <GAME NUMBER> - observe a game
+                    logout - sign out
+                    help - display available commands
+                    quit - exit the program
+                    """;
+        }
         return """
-            create <GAME NAME> - create a chess game
-            list - list available games
-            play <GAME NUMBER> <WHITE|BLACK> - join a game
-            observe <GAME NUMBER> - observe a game
-            logout - sign out
-            help - display available commands
+            redraw - redraw the chess board
+            move <START> <END> - make a chess move
+            highlight <POSITION> - highlight legal moves
+            resign - resign from the game
+            leave - leave the game
+            help - show available commands
             quit - exit the program
             """;
     }
+
+    private String redraw(String... params) {
+        assertInGame();
+        if (params.length != 0) {
+            throw new IllegalArgumentException("Expected: redraw");
+        }
+        if (currentGame == null) {
+            return "The game board has not loaded yet.";
+        }
+        return "Board redraw will be completed later.";
+    }
+
+    private String makeMove(String... params) {
+        assertInGame();
+
+        if (params.length != 2 && params.length != 3) {
+            throw new IllegalArgumentException(
+                    "Expected: move <START> <END> [PROMOTION]");
+        }
+
+        return "Making moves will be completed later.";
+    }
+
+    private String leaveGame(String... params) {
+        assertInGame();
+
+        if (params.length != 0) {
+            throw new IllegalArgumentException(
+                    "Expected: leave"
+            );
+        }
+
+        return "Leaving the game will be completed later.";
+    }
+
+    private String resign(String... params) {
+        assertInGame();
+
+        if (params.length != 0) {
+            throw new IllegalArgumentException(
+                    "Expected: resign");
+        }
+
+        return "Resigning will be completed later.";
+    }
+
+    private String highlightMoves(String... params) {
+        assertInGame();
+
+        if (params.length != 1) {
+            throw new IllegalArgumentException(
+                    "Expected: highlight <POSITION>"
+            );
+        }
+
+        if (currentGame == null) {
+            return "The game board has not loaded yet.";
+        }
+
+        return "Legal-move highlighting will be completed in Step 11.";
+    }
+
 
     private String register(String... params) throws ResponseException {
         assertSignedOut();
@@ -285,6 +365,13 @@ public class ChessClient implements ServerMessageObserver {
     private void assertSignedOut() {
         if (state != State.SIGNED_OUT) {
             throw new IllegalArgumentException("You are already signed in.");
+        }
+    }
+
+    private void assertInGame(){
+        if (state != State.GAMEPLAY) {
+            throw new IllegalArgumentException(
+                    "You must be in a game first.");
         }
     }
 }
