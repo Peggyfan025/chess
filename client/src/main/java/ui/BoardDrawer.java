@@ -88,10 +88,8 @@ public class BoardDrawer {
         // a1 is a dark square.
         if ((row + column) % 2 == 0) {
             result.append(SET_BG_COLOR_DARK_GREY);
-            result.append(SET_TEXT_COLOR_WHITE);
         } else {
             result.append(SET_BG_COLOR_LIGHT_GREY);
-            result.append(SET_TEXT_COLOR_BLACK);
         }
     }
 
@@ -101,7 +99,7 @@ public class BoardDrawer {
         }
 
         if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-            return switch (piece.getPieceType()) {
+            return SET_TEXT_COLOR_RED + switch (piece.getPieceType()) {
                 case KING -> WHITE_KING;
                 case QUEEN -> WHITE_QUEEN;
                 case BISHOP -> WHITE_BISHOP;
@@ -111,7 +109,7 @@ public class BoardDrawer {
             };
         }
 
-        return switch (piece.getPieceType()) {
+        return SET_TEXT_COLOR_BLUE + switch (piece.getPieceType()) {
             case KING -> BLACK_KING;
             case QUEEN -> BLACK_QUEEN;
             case BISHOP -> BLACK_BISHOP;

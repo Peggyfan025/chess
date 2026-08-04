@@ -144,7 +144,7 @@ public class ChessClient implements ServerMessageObserver {
         if (currentGame == null) {
             return "The game board has not loaded yet.";
         }
-        return "Board redraw will be completed later.";
+        return BoardDrawer.drawBoard(currentGame.getBoard(), perspective);
     }
 
     private String makeMove(String... params) {
@@ -334,7 +334,7 @@ public class ChessClient implements ServerMessageObserver {
         observing = false;
         state = State.GAMEPLAY;
 
-        return "Connected to " + game.gameName() + " as " + color + ".";
+        return "Connected to " + game.gameName() + " as " + color + ".\n" + help();
     }
 
     private String observeGame(String... params) throws ResponseException {
@@ -370,7 +370,7 @@ public class ChessClient implements ServerMessageObserver {
         observing = true;
         state = State.GAMEPLAY;
 
-        return "Observing " + game.gameName() + ".";
+        return "Observing " + game.gameName() + ".\n" + help();
     }
 
     private void connectToGame(int gameID) throws ResponseException {
