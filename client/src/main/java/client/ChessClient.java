@@ -38,7 +38,30 @@ public class ChessClient implements ServerMessageObserver {
 
     @Override
     public void notify(ServerMessage message) {
-        System.out.println("\nReceived: " + message.getServerMessageType());
+        if (message == null || message.getServerMessageType() == null) {
+            System.out.println("\nError: Invalid message received from server.");
+            return;
+        }
+
+        switch (message.getServerMessageType()) {
+            case LOAD_GAME -> {
+                currentGame = message.getGame();
+                if (currentGame == null) {
+                    System.out.println("\nError: Server did not provide a game.");
+                }
+                else {
+                    System.out.println("\n" + BoardDrawer.drawBoard(currentGame.getBoard(), perspective));
+                }
+            }
+
+            case NOTIFICATION -> {
+                System.out.println("\n" + message.getMessage());
+            }
+
+            case ERROR -> {System.out.println("\n" + message.getErrorMessage());
+            }
+        }
+        System.out.print(">>> ");
     }
 
     public String eval(String input) {

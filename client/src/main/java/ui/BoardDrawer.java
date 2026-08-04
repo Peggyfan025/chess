@@ -9,10 +9,7 @@ import static ui.EscapeSequences.*;
 
 
 public class BoardDrawer {
-    public static String drawBoard(ChessGame.TeamColor perspective) {
-        ChessBoard board = new ChessBoard();
-        board.resetBoard();
-
+    public static String drawBoard(ChessBoard board, ChessGame.TeamColor perspective) {
         StringBuilder result = new StringBuilder();
         appendColumnLabels(result, perspective);
 
@@ -24,6 +21,7 @@ public class BoardDrawer {
             else {
                 row = index + 1;
             }
+
             appendRow(result, board, row, perspective);
         }
         // for having lable bottom and top
@@ -61,9 +59,8 @@ public class BoardDrawer {
         result.append(" ").append(row).append("\n");
     }
 
-    private static void appendColumnLabels(
-            StringBuilder result,
-            ChessGame.TeamColor perspective) {
+    private static void appendColumnLabels(StringBuilder result,
+           ChessGame.TeamColor perspective) {
 
         result.append(RESET_BG_COLOR);
         result.append(SET_TEXT_COLOR_WHITE);
@@ -80,18 +77,13 @@ public class BoardDrawer {
             }
 
             char letter = (char) ('a' + column - 1);
-
-            result.append(" ")
-                    .append(letter)
-                    .append(" ");
+            result.append(" ").append(letter).append(" ");
         }
         result.append("\n");
     }
 
     private static void setSquareColor(
-            StringBuilder result,
-            int row,
-            int column) {
+            StringBuilder result, int row, int column) {
 
         // a1 is a dark square.
         if ((row + column) % 2 == 0) {
