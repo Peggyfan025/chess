@@ -28,6 +28,7 @@ public class ChessClient implements ServerMessageObserver {
     private ChessGame currentGame;
     private ChessGame.TeamColor perspective;
     private boolean observing;
+    private boolean awaitingResignConfirmation;
 
     private enum State {
         SIGNED_OUT,
@@ -73,6 +74,10 @@ public class ChessClient implements ServerMessageObserver {
             String trimmedInput = input.trim();
             if (trimmedInput.isEmpty()) {
                 return help();
+            }
+
+            if (awaitingResignConfirmation) {
+                return confirmResign(trimmedInput);
             }
 
             String[] tokens = trimmedInput.split("\\s+");
@@ -206,11 +211,15 @@ public class ChessClient implements ServerMessageObserver {
         assertInGame();
 
         if (params.length != 0) {
-            throw new IllegalArgumentException(
-                    "Expected: resign");
+            throw new IllegalArgumentException("Expected: resign");
         }
 
-        return "Resigning will be completed later.";
+        if (observing) {
+            throw new IllegalArgumentException("Observers cannot resign.");
+        }
+
+        awaitingResignConfirmation = true;
+        return "Are you sure you want to resign? Type yes or no.";
     }
 
     private String highlightMoves(String... params) {
@@ -462,5 +471,24 @@ public class ChessClient implements ServerMessageObserver {
             throw new IllegalArgumentException(
                     "Promotion must be QUEEN, ROOK, BISHOP, or KNIGHT.");
         }
+    }
+
+    private String confirmResign(String input) throws ResponseException {
+        if (input.equalsIgnoreCase("no")) {
+            awaitingResignConfirmation = false;
+            return "Resignation canceled.";
+        }
+
+        if (!input.equalsIgnoreCase("yes")) {
+            return "Please type yes or no.";
+        }
+
+        UserGameCommand command = new UserGameCommand(
+                UserGameCommand.CommandType.RESIGN,
+                authToken, currentGameID);
+
+        websocket.send(command);
+        awaitingResignConfirmation = false;
+        return "";
     }
 }

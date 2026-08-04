@@ -60,7 +60,7 @@ public class WebSocketHandler {
                     makeMove(ctx, moveCommand);
                 }
                 case LEAVE -> leave(ctx, command);
-                case RESIGN -> System.out.println("RESIGN command received");
+                case RESIGN -> resign(ctx, command);
             }
 
         }
@@ -126,10 +126,7 @@ public class WebSocketHandler {
         }
     }
 
-    private void makeMove(
-            WsMessageContext ctx,
-            MakeMoveCommand command) {
-
+    private void makeMove(WsMessageContext ctx, MakeMoveCommand command) {
         try {
             if (command == null) {
                 sendError(ctx, "Invalid move command.");
@@ -185,6 +182,10 @@ public class WebSocketHandler {
             }
 
             ChessGame game = gameData.game();
+            if (game.isGameOver()) {
+                sendError(ctx, "The game is already over.");
+                return;
+            }
 
             if (game.getTeamTurn() != playerColor) {
                 sendError(ctx, "It is not your turn.");
@@ -192,6 +193,11 @@ public class WebSocketHandler {
             }
 
             game.makeMove(move);
+            ChessGame.TeamColor nextTurn = game.getTeamTurn();
+            if (game.isInCheckmate(nextTurn) || game.isInStalemate(nextTurn)) {
+                game.setGameOver(true);
+            }
+
             gameDAO.updateGame(gameData);
             ServerMessage loadGameMessage = ServerMessage.loadGame(game);
             connections.broadcast(gameID, loadGameMessage, null);
@@ -267,6 +273,63 @@ public class WebSocketHandler {
         }
         catch (DataAccessException exception) {
             sendError(ctx, "Unable to leave the game.");
+        }
+    }
+
+    private void resign(WsMessageContext ctx, UserGameCommand command) {
+        try {
+            String authToken = command.getAuthToken();
+            Integer gameID = command.getGameID();
+
+            if (authToken == null || authToken.isBlank()) {
+                sendError(ctx, "Invalid authentication token.");
+                return;
+            }
+
+            if (gameID == null) {
+                sendError(ctx, "Invalid game ID.");
+                return;
+            }
+
+            AuthData authData = authDAO.getAuth(authToken);
+
+            if (authData == null) {
+                sendError(ctx, "Invalid authentication token.");
+                return;
+            }
+
+            GameData gameData = gameDAO.getGame(gameID);
+
+            if (gameData == null) {
+                sendError(ctx, "Game does not exist.");
+                return;
+            }
+
+            String username = authData.username();
+
+            boolean isWhitePlayer = username.equals(gameData.whiteUsername());
+            boolean isBlackPlayer = username.equals(gameData.blackUsername());
+
+            if (!isWhitePlayer && !isBlackPlayer) {
+                sendError(ctx, "Observers cannot resign.");
+                return;
+            }
+
+            ChessGame game = gameData.game();
+
+            if (game.isGameOver()) {
+                sendError(ctx, "The game is already over.");
+                return;
+            }
+
+            game.setGameOver(true);
+            gameDAO.updateGame(gameData);
+
+            ServerMessage notification = ServerMessage.notification(username + " resigned from the game.");
+            connections.broadcast(gameID, notification, null);
+        }
+        catch (DataAccessException exception) {
+            sendError(ctx, "Unable to resign from the game.");
         }
     }
 
