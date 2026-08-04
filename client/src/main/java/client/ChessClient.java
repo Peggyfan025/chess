@@ -14,9 +14,7 @@ import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class ChessClient implements ServerMessageObserver {
     private final ServerFacade server;
@@ -226,16 +224,30 @@ public class ChessClient implements ServerMessageObserver {
         assertInGame();
 
         if (params.length != 1) {
-            throw new IllegalArgumentException(
-                    "Expected: highlight <POSITION>"
-            );
+            throw new IllegalArgumentException("Expected: highlight <POSITION>");
         }
 
         if (currentGame == null) {
             return "The game board has not loaded yet.";
         }
 
-        return "Legal-move highlighting will be completed in Step 11.";
+        ChessPosition selectedPosition = parsePosition(params[0]);
+        ChessPiece selectedPiece = currentGame.getBoard().getPiece(selectedPosition);
+
+        if (selectedPiece == null) {
+            return "There is no piece at " + params[0].toLowerCase() + ".";
+        }
+
+        Collection<ChessMove> legalMoves = currentGame.validMoves(selectedPosition);
+        Set<ChessPosition> legalPositions = new HashSet<>();
+
+        if (legalMoves != null) {
+            for (ChessMove move : legalMoves) {
+                legalPositions.add(move.getEndPosition());
+            }
+        }
+
+        return BoardDrawer.drawHighlightedBoard(currentGame.getBoard(), perspective, selectedPosition, legalPositions);
     }
 
 

@@ -5,36 +5,27 @@ import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
+import java.util.Set;
+
 import static ui.EscapeSequences.*;
 
 
 public class BoardDrawer {
     public static String drawBoard(ChessBoard board, ChessGame.TeamColor perspective) {
-        StringBuilder result = new StringBuilder();
-        appendColumnLabels(result, perspective);
-
-        for (int index = 0; index < 8; index++) {
-            int row;
-            if (perspective == ChessGame.TeamColor.WHITE) {
-                row = 8 - index;
-            }
-            else {
-                row = index + 1;
-            }
-
-            appendRow(result, board, row, perspective);
-        }
-        // for having lable bottom and top
-        appendColumnLabels(result, perspective);
-        result.append(RESET_BG_COLOR);
-        result.append(RESET_TEXT_COLOR);
-
-        return result.toString();
+        return buildBoard(board, perspective, null, Set.of());
+    }
+    public static String drawHighlightedBoard(ChessBoard board, ChessGame.TeamColor perspective, ChessPosition selectedPosition,
+            Set<ChessPosition> legalPositions) {
+        return buildBoard(board, perspective, selectedPosition, legalPositions);
     }
 
-    private static void appendRow(StringBuilder result, ChessBoard board, int row, ChessGame.TeamColor perspective) {
+    private static void appendRow(
+            StringBuilder result, ChessBoard board, int row,
+            ChessGame.TeamColor perspective, ChessPosition selectedPosition,
+            Set<ChessPosition> legalPositions) {
+
         result.append(RESET_BG_COLOR);
-        result.append(SET_TEXT_COLOR_WHITE);
+        result.append(RESET_TEXT_COLOR);
         result.append(" ").append(row).append(" ");
 
         for (int index = 0; index < 8; index++) {
@@ -47,15 +38,14 @@ public class BoardDrawer {
                 column = 8 - index;
             }
 
-            setSquareColor(result, row, column);
-
             ChessPosition position = new ChessPosition(row, column);
+            setSquareColor(result, position, selectedPosition, legalPositions);
             ChessPiece piece = board.getPiece(position);
             result.append(getPieceSymbol(piece));
         }
 
         result.append(RESET_BG_COLOR);
-        result.append(SET_TEXT_COLOR_WHITE);
+        result.append(RESET_TEXT_COLOR);
         result.append(" ").append(row).append("\n");
     }
 
@@ -83,12 +73,26 @@ public class BoardDrawer {
     }
 
     private static void setSquareColor(
-            StringBuilder result, int row, int column) {
+            StringBuilder result, ChessPosition position,
+            ChessPosition selectedPosition, Set<ChessPosition> legalPositions) {
 
-        // a1 is a dark square.
+        if (position.equals(selectedPosition)) {
+            result.append(SET_BG_COLOR_YELLOW);
+            return;
+        }
+
+        if (legalPositions.contains(position)) {
+            result.append(SET_BG_COLOR_GREEN);
+            return;
+        }
+
+        int row = position.getRow();
+        int column = position.getColumn();
+
         if ((row + column) % 2 == 0) {
             result.append(SET_BG_COLOR_DARK_GREY);
-        } else {
+        }
+        else {
             result.append(SET_BG_COLOR_LIGHT_GREY);
         }
     }
@@ -118,4 +122,28 @@ public class BoardDrawer {
             case PAWN -> BLACK_PAWN;
         };
     }
+    private static String buildBoard(
+            ChessBoard board, ChessGame.TeamColor perspective, ChessPosition selectedPosition,
+            Set<ChessPosition> legalPositions) {
+
+        StringBuilder result = new StringBuilder();
+        appendColumnLabels(result, perspective);
+
+        for (int index = 0; index < 8; index++) {
+            int row;
+
+            if (perspective == ChessGame.TeamColor.WHITE) {
+                row = 8 - index;
+            }
+            else {
+                row = index + 1;
+            }
+
+            appendRow(result, board, row, perspective, selectedPosition, legalPositions);
+        }
+        result.append(RESET_BG_COLOR);
+        result.append(RESET_TEXT_COLOR);
+        return result.toString();
+    }
+
 }
