@@ -2,15 +2,17 @@ package client;
 
 
 import chess.ChessGame;
+import client.websocket.ServerMessageObserver;
 import model.AuthData;
 import model.GameData;
 import ui.BoardDrawer;
+import websocket.messages.ServerMessage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ChessClient {
+public class ChessClient implements ServerMessageObserver {
     private final ServerFacade server;
     private State state = State.SIGNED_OUT;
     private String authToken;
@@ -23,6 +25,11 @@ public class ChessClient {
 
     public ChessClient(ServerFacade server) {
         this.server = server;
+    }
+
+    @Override
+    public void notify(ServerMessage message) {
+        //to be added
     }
 
     public String eval(String input) {

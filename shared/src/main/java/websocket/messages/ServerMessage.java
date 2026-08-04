@@ -1,5 +1,7 @@
 package websocket.messages;
 
+import chess.ChessGame;
+
 import java.util.Objects;
 
 /**
@@ -10,6 +12,15 @@ import java.util.Objects;
  */
 public class ServerMessage {
     ServerMessageType serverMessageType;
+
+    // Used by LOAD_GAME
+    private ChessGame game;
+
+    // Used by ERROR
+    private String errorMessage;
+
+    // Used by NOTIFICATION
+    private String message;
 
     public enum ServerMessageType {
         LOAD_GAME,
@@ -23,6 +34,44 @@ public class ServerMessage {
 
     public ServerMessageType getServerMessageType() {
         return this.serverMessageType;
+    }
+
+    private ServerMessage(ServerMessageType type, ChessGame game, String errorMessage,String message){
+        this.serverMessageType = type;
+        this.game = game;
+        this.errorMessage = errorMessage;
+        this.message = message;
+    }
+
+    public static ServerMessage loadGame(ChessGame game) {
+        return new ServerMessage(ServerMessageType.LOAD_GAME, game, null, null);
+    }
+
+    public static ServerMessage error(String errorMessage){
+        if (!errorMessage.toLowerCase().contains("error")){
+            errorMessage = "Error: " + errorMessage;
+        }
+        return new ServerMessage(ServerMessageType.ERROR,null,errorMessage,null);
+    }
+
+    public static ServerMessage notification(String message) {
+        return new ServerMessage(ServerMessageType.NOTIFICATION, null, null, message);
+    }
+
+    public ServerMessageType getServerMessageType() {
+        return this.serverMessageType;
+    }
+
+    public ChessGame getGame() {
+        return game;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public String getMessage() {
+        return message;
     }
 
     @Override
