@@ -46,7 +46,7 @@ public class Server {
             javalin.put("/game", handler::joinGame);
             //websocket
             ConnectionManager connectionManager = new ConnectionManager();
-            WebSocketHandler webSocketHandler = new WebSocketHandler(connectionManager);
+            WebSocketHandler webSocketHandler = new WebSocketHandler(connectionManager, sqlDataAccess,sqlDataAccess);
             javalin.ws("/ws", webSocketHandler::configure);
         }
         catch (DataAccessException ex) {

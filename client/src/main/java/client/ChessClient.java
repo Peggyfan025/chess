@@ -37,7 +37,7 @@ public class ChessClient implements ServerMessageObserver {
 
     @Override
     public void notify(ServerMessage message) {
-        //to be added
+        System.out.println("\nReceived: " + message.getServerMessageType());
     }
 
     public String eval(String input) {
@@ -225,9 +225,7 @@ public class ChessClient implements ServerMessageObserver {
         GameData game = listedGames.get(gameNumber - 1);
         server.joinGame(authToken, game.gameID(), color);
 
-        websocket.connect();
-        UserGameCommand connectCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken,game.gameID());
-        websocket.send(connectCommand);
+        connectToGame(game.gameID());
         currentGameID = game.gameID();
         perspective = color;
         observing = false;
@@ -236,7 +234,7 @@ public class ChessClient implements ServerMessageObserver {
         return "Connected to" + game.gameName() + "as" + color + ".";
     }
 
-    private String observeGame(String... params){
+    private String observeGame(String... params) throws ResponseException {
         assertSignedIn();
 
         if (params.length != 1) {
@@ -262,8 +260,20 @@ public class ChessClient implements ServerMessageObserver {
         }
 
         GameData game = listedGames.get(gameNumber - 1);
-        return "Observing " + game.gameName() + ".\n"
-                + BoardDrawer.drawBoard(ChessGame.TeamColor.WHITE);
+
+        connectToGame(game.gameID());
+        currentGameID = game.gameID();
+        perspective = ChessGame.TeamColor.WHITE;
+        observing = true;
+        state = State.GAMEPLAY;
+
+        return "Observing " + game.gameName() + ".";
+    }
+
+    private void connectToGame(int gameID) throws ResponseException {
+        websocket.connect();
+        UserGameCommand connectCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
+        websocket.send(connectCommand);
     }
 
     private void assertSignedIn() {
