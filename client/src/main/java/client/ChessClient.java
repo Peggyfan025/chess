@@ -231,7 +231,7 @@ public class ChessClient implements ServerMessageObserver {
         observing = false;
         state = State.GAMEPLAY;
 
-        return "Connected to" + game.gameName() + "as" + color + ".";
+        return "Connected to " + game.gameName() + " as " + color + ".";
     }
 
     private String observeGame(String... params) throws ResponseException {
