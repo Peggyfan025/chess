@@ -58,10 +58,6 @@ public class ServerMessage {
         return new ServerMessage(ServerMessageType.NOTIFICATION, null, null, message);
     }
 
-    public ServerMessageType getServerMessageType() {
-        return this.serverMessageType;
-    }
-
     public ChessGame getGame() {
         return game;
     }
