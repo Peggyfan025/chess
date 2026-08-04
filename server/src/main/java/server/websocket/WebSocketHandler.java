@@ -1,5 +1,8 @@
 package server.websocket;
 
+import chess.ChessGame;
+import chess.ChessPosition;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
@@ -8,6 +11,7 @@ import io.javalin.websocket.WsConfig;
 import io.javalin.websocket.WsMessageContext;
 import model.AuthData;
 import model.GameData;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
@@ -50,7 +54,11 @@ public class WebSocketHandler {
             //actual function to be added
             switch (command.getCommandType()) {
                 case CONNECT -> connect(ctx,command);
-                case MAKE_MOVE -> System.out.println("MAKE_MOVE command received");
+                case MAKE_MOVE -> {
+                    MakeMoveCommand moveCommand = serializer.fromJson(
+                                ctx.message(), MakeMoveCommand.class);
+                    makeMove(ctx, moveCommand);
+                }
                 case LEAVE -> System.out.println("LEAVE command received");
                 case RESIGN -> System.out.println("RESIGN command received");
             }
@@ -116,6 +124,133 @@ public class WebSocketHandler {
         catch (DataAccessException exception) {
             sendError(context, "Unable to access the game.");
         }
+    }
+
+    private void makeMove(
+            WsMessageContext ctx,
+            MakeMoveCommand command) {
+
+        try {
+            if (command == null) {
+                sendError(ctx, "Invalid move command.");
+                return;
+            }
+
+            String authToken = command.getAuthToken();
+            Integer gameID = command.getGameID();
+            chess.ChessMove move = command.getMove();
+
+            if (authToken == null || authToken.isBlank()) {
+                sendError(ctx, "Invalid authentication token.");
+                return;
+            }
+
+            if (gameID == null) {
+                sendError(ctx, "Invalid game ID.");
+                return;
+            }
+
+            if (move == null) {
+                sendError(ctx, "A move was not provided.");
+                return;
+            }
+
+            AuthData authData = authDAO.getAuth(authToken);
+
+            if (authData == null) {
+                sendError(ctx, "Invalid authentication token.");
+                return;
+            }
+
+            GameData gameData = gameDAO.getGame(gameID);
+
+            if (gameData == null) {
+                sendError(ctx, "Game does not exist.");
+                return;
+            }
+
+            String username = authData.username();
+            ChessGame.TeamColor playerColor;
+
+            if (username.equals(gameData.whiteUsername())) {
+                playerColor = ChessGame.TeamColor.WHITE;
+
+            }
+            else if (username.equals(gameData.blackUsername())) {
+                playerColor = ChessGame.TeamColor.BLACK;
+            }
+            else {
+                sendError(ctx, "Observers cannot make moves.");
+                return;
+            }
+
+            ChessGame game = gameData.game();
+
+            if (game.getTeamTurn() != playerColor) {
+                sendError(ctx, "It is not your turn.");
+                return;
+            }
+
+            game.makeMove(move);
+            gameDAO.updateGame(gameData);
+            ServerMessage loadGameMessage = ServerMessage.loadGame(game);
+            connections.broadcast(gameID, loadGameMessage, null);
+
+            String moveDescription = username + " moved " + positionToString(move.getStartPosition())
+                    + " to " + positionToString(move.getEndPosition()) + ".";
+
+            ServerMessage moveNotification = ServerMessage.notification(moveDescription);
+            connections.broadcast(gameID, moveNotification, ctx.sessionId());
+            sendGameStatusNotifications(gameID, gameData);
+        }
+        catch (InvalidMoveException exception) {
+            sendError(ctx, "Invalid move: " + exception.getMessage());
+        }
+        catch (DataAccessException exception) {
+            sendError(ctx, "Unable to update the game.");
+        }
+    }
+
+    private String positionToString(ChessPosition position) {
+        char column = (char) ('a' + position.getColumn() - 1);
+        return String.valueOf(column) + position.getRow();
+    }
+
+    private void sendGameStatusNotifications(int gameID, GameData gameData) {
+        ChessGame game = gameData.game();
+        ChessGame.TeamColor team = game.getTeamTurn();
+        String username = getPlayerName(gameData, team);
+
+        String statusMessage = null;
+        if (game.isInCheckmate(team)) {
+            statusMessage = username + " is in checkmate.";
+        }
+        else if (game.isInStalemate(team)) {
+            statusMessage = "The game ended in stalemate.";
+        }
+        else if (game.isInCheck(team)) {
+            statusMessage = username + " is in check.";
+        }
+
+        if (statusMessage != null) {
+            connections.broadcast(gameID, ServerMessage.notification(statusMessage), null);
+        }
+    }
+
+    private String getPlayerName(GameData gameData, ChessGame.TeamColor color) {
+        String username;
+
+        if (color == ChessGame.TeamColor.WHITE) {
+            username = gameData.whiteUsername();
+        }
+        else {
+            username = gameData.blackUsername();
+        }
+
+        if (username == null) {
+            return color == ChessGame.TeamColor.WHITE ? "White" : "Black";
+        }
+        return username;
     }
 
     private void sendError(WsMessageContext context, String message) {
