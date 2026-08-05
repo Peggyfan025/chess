@@ -18,6 +18,7 @@ public class WebSocketCommunicator {
     private final Gson serializer = new Gson();
     private final ServerMessageObserver observer;
     private final URI serverUri;
+    private final ClientManager client = ClientManager.createClient();
 
     private jakarta.websocket.Session session;
 
@@ -33,10 +34,16 @@ public class WebSocketCommunicator {
         }
 
         try {
-            ClientManager client = ClientManager.createClient();
-            session = client.connectToServer(this, serverUri);
+            client.connectToServer(this, serverUri);
+            if (!isOpen()) {
+                throw new ResponseException("The game connection did not open.");
+            }
 
-        } catch (Exception exception) {
+        }
+        catch (ResponseException exception) {
+            throw exception;
+        }
+        catch (Exception exception) {
             throw new ResponseException("Unable to connect to the game server.");
         }
     }

@@ -430,12 +430,20 @@ public class ChessClient implements ServerMessageObserver {
     }
 
     private void connectToGame(int gameID) throws ResponseException {
-        websocket.connect();
-        UserGameCommand connectCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
-        websocket.send(connectCommand);
+        if (!websocket.isOpen()) {
+            websocket.connect();
+        }
+
+        UserGameCommand command = new UserGameCommand(
+                UserGameCommand.CommandType.CONNECT, authToken, gameID);
+        websocket.send(command);
     }
 
     private void assertSignedIn() {
+        if (state == State.GAMEPLAY) {
+            throw new IllegalArgumentException(
+                    "Leave the current game before using this command.");
+        }
         if (state != State.SIGNED_IN) {
             throw new IllegalArgumentException("You must sign in first.");
         }
