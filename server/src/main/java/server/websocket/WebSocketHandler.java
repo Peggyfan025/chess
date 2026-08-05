@@ -28,8 +28,9 @@ public class WebSocketHandler {
     }
 
     public void configure(WsConfig ws) {
-        ws.onConnect(ctx ->
-                System.out.println("WebSocket opened: " + ctx.sessionId()));
+        ws.onConnect(ctx -> {
+                ctx.enableAutomaticPings();
+                System.out.println("WebSocket opened: " + ctx.sessionId());});
 
         ws.onMessage(this::handleMessage);
 
